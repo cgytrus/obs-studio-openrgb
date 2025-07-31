@@ -40,7 +40,6 @@
 #include <obs.h>
 #include <qtimer.h>
 #include <string>
-#include <obs-frontend-api.h>
 
 using namespace std;
 
