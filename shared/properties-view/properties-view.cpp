@@ -282,10 +282,8 @@ QWidget *OBSPropertiesView::AddCheckbox(obs_property_t *prop)
 		return widget;
 	}
 
-	QString file = !obs_frontend_is_theme_dark() ? ":/res/images/help.svg" : ":/res/images/help_light.svg";
-
-	IconLabel *help = new IconLabel(checkbox);
-	help->setIcon(QIcon(file));
+	QLabel *help = new QLabel(checkbox);
+	help->setText("?");
 	help->setToolTip(long_desc);
 
 #ifdef __APPLE__
@@ -358,12 +356,7 @@ QWidget *OBSPropertiesView::AddText(obs_property_t *prop, QFormLayout *layout, Q
 			label = new QLabel(desc);
 
 		if (long_desc != NULL && !info_label->text().isEmpty()) {
-			QString file = !obs_frontend_is_theme_dark() ? ":/res/images/help.svg"
-								     : ":/res/images/help_light.svg";
-			QString lStr = "<html>%1 <img src='%2' style=' \
-				vertical-align: bottom; ' /></html>";
-
-			info_label->setText(lStr.arg(info_label->text(), file));
+			info_label->setText(info_label->text());
 			info_label->setToolTip(QT_UTF8(long_desc));
 		} else if (long_desc != NULL) {
 			info_label->setText(QT_UTF8(long_desc));
@@ -461,10 +454,10 @@ void OBSPropertiesView::AddInt(obs_property_t *prop, QFormLayout *layout, QLabel
 		subLayout->addWidget(slider);
 
 		connect(slider, &QSlider::valueChanged, spin, &QSpinBox::setValue);
-		connect(spin, &QSpinBox::valueChanged, slider, &QSlider::setValue);
+		connect(spin, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), slider, &QSlider::setValue);
 	}
 
-	connect(spin, &QSpinBox::valueChanged, info, &WidgetInfo::ControlChanged);
+	connect(spin, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), info, &WidgetInfo::ControlChanged);
 
 	subLayout->addWidget(spin);
 
@@ -513,10 +506,10 @@ void OBSPropertiesView::AddFloat(obs_property_t *prop, QFormLayout *layout, QLab
 		subLayout->addWidget(slider);
 
 		connect(slider, &DoubleSlider::doubleValChanged, spin, &QDoubleSpinBox::setValue);
-		connect(spin, &QDoubleSpinBox::valueChanged, slider, &DoubleSlider::setDoubleVal);
+		connect(spin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), slider, &DoubleSlider::setDoubleVal);
 	}
 
-	connect(spin, &QDoubleSpinBox::valueChanged, info, &WidgetInfo::ControlChanged);
+	connect(spin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), info, &WidgetInfo::ControlChanged);
 
 	subLayout->addWidget(spin);
 
@@ -630,7 +623,7 @@ QWidget *OBSPropertiesView::AddList(obs_property_t *prop, bool &warning)
 			buttonGroup->setExclusive(true);
 			WidgetInfo *info = new WidgetInfo(this, prop, buttonGroup->buttons()[0]);
 			children.emplace_back(info);
-			connect(buttonGroup, &QButtonGroup::buttonClicked, info, &WidgetInfo::ControlChanged);
+			connect(buttonGroup, static_cast<void(QButtonGroup::*)(QAbstractButton*)>(&QButtonGroup::buttonClicked), info, &WidgetInfo::ControlChanged);
 		}
 
 		QWidget *widget = new QWidget();
@@ -678,7 +671,7 @@ QWidget *OBSPropertiesView::AddList(obs_property_t *prop, bool &warning)
 	warning = idx != -1 && model->flags(model->index(idx, 0)) == Qt::NoItemFlags;
 
 	WidgetInfo *info = new WidgetInfo(this, prop, combo);
-	connect(combo, &QComboBox::currentIndexChanged, info, &WidgetInfo::ControlChanged);
+	connect(combo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), info, &WidgetInfo::ControlChanged);
 	children.emplace_back(info);
 
 	/* trigger a settings update if the index was not found */
@@ -1545,8 +1538,6 @@ void OBSPropertiesView::AddProperty(obs_property_t *property, QFormLayout *layou
 
 	QWidget *leftWidget = label;
 	if (obs_property_long_description(property) && label) {
-		QString file = !obs_frontend_is_theme_dark() ? ":/res/images/help.svg" : ":/res/images/help_light.svg";
-
 		QWidget *newWidget = new QWidget();
 		newWidget->setToolTip(obs_property_long_description(property));
 
@@ -1555,8 +1546,8 @@ void OBSPropertiesView::AddProperty(obs_property_t *property, QFormLayout *layou
 		boxLayout->setAlignment(Qt::AlignLeft);
 		boxLayout->setSpacing(0);
 
-		IconLabel *help = new IconLabel(newWidget);
-		help->setIcon(QIcon(file));
+		QLabel *help = new QLabel(newWidget);
+		help->setText("?");
 		help->setToolTip(obs_property_long_description(property));
 
 		boxLayout->addWidget(label);

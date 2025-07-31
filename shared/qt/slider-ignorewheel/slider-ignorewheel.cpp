@@ -24,7 +24,7 @@ void SliderIgnoreClick::mousePressEvent(QMouseEvent *event)
 	QStyleOptionSlider styleOption;
 	initStyleOption(&styleOption);
 	QRect handle = style()->subControlRect(QStyle::CC_Slider, &styleOption, QStyle::SC_SliderHandle, this);
-	if (handle.contains(event->position().toPoint())) {
+	if (handle.contains(event->pos())) {
 		SliderIgnoreScroll::mousePressEvent(event);
 		dragging = true;
 	} else {
